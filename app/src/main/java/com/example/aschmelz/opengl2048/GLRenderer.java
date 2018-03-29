@@ -561,45 +561,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
             ssu = ssx;
     }
 
-    float mLastTouchX, mLastTouchY, mTouchDistanceTravel = 0;
-    boolean mTouchActive;
-    float scroll = 0;
+
 
     public void processTouchEvent(MotionEvent event) {
         // Get the half of screen value
-        int screenhalf = (int) (mScreenWidth / 2);
-        int screenheightpart = (int) (mScreenHeight / 3);
-
-        float x = event.getX(),
-                y = event.getY();
-        float moveX = mLastTouchX - x,
-                moveY = mLastTouchY - y;
-        coverImage(SPR_SOLID_WHITE, x - 10, y - 10, x + 10, y + 10, 1, COLOR_RED);
-        int action = event.getAction();
-        if (action == ACTION_DOWN) {
-            mTouchActive = true;
-            mTouchDistanceTravel = 0;
-            moveX = 0;
-            moveY = 0;
-            //(int idx, float left, float top, float right, float bottom, float progress, float[] color)
-        } else {
-            mTouchDistanceTravel += Math.sqrt(moveX * moveX + moveY * moveY);
-
-        }
-        if (action == ACTION_MOVE) {
-            scroll -= moveY;
-
-
-        }
-
-        if (action == ACTION_UP) {
-            Log.d("ACTION_UP", "travel dis" + mTouchDistanceTravel);
-            mTouchActive = false;
 
             overlay.processTouchEvent(event);
-        }
-        mLastTouchX = x;
-        mLastTouchY = y;
 
 
 
