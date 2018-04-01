@@ -7,6 +7,10 @@ package com.example.aschmelz.opengl2048;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -20,20 +24,24 @@ import static com.example.aschmelz.opengl2048.TextManager.*;
 public class Overlay extends RenderHelper {
     private ClickRegion CR_amount_btn = new ClickRegion(0.7f, 0.15f, 0.9f, 0.5f, 0);
 
+
+
     public Overlay(GLRenderer renderer) {
         this.renderer = renderer;
+
+        addNewTile();
     }
 
     public void update(double dt) {
         this.render(dt);
+        for(Tile tile : tiles) {
+            tile.update(dt);
+        }
     }
 
-    private int[][] state = {
-            {1,2,3,1},
-            {0,0,1,0},
-            {1,1,0,0},
-            {0,1,1,0}
-    };
+    private List<Tile> tiles = new ArrayList<>();
+
+    private int[][] state = new int[4][4];
 
     private float[][] bgColor = {
             {.929f, .890f, .852f, 1},   // 2
@@ -54,7 +62,6 @@ public class Overlay extends RenderHelper {
             50, // 64
             40, // 128
             40, // 256
-
     };
 
 
@@ -70,6 +77,10 @@ public class Overlay extends RenderHelper {
             this.width = width;
             this.height = width;
             offsetY = (height - this.height) / 2;
+        }
+
+        for (Tile tile : tiles) {
+            tile.onSurfaceChanged(this.width, this.height, offsetX, offsetY);
         }
     }
 
@@ -137,76 +148,63 @@ Log.d("MOVE", scrollX +   " " + scrollY);
     private void move(int x, int y) {
         Log.d("move", "direction " + x + " " + y);
         boolean moved = false;
+
+        int sX = 0, sY = 0, dX = 0, dY = 0, prevX = 0, prevY = 0;
         // left
         for (int i = 0; i < 4; i++) {
             int idx = 0;
             int lastState = 0;
             for (int j = 0; j< 4; j++) {
-
-
                 if (x == -1) {
-                    int curState = state[i][j];
-                    state[i][j] = 0;    // reset
-                    if (curState != 0) {
-                        if (lastState == curState) {
-                            state[i][idx - 1]++;
-                            moved = true;
-                        } else {
-                            if (idx != j) moved = true;
-                            state[i][idx] = curState;
-                            idx++;
-                            lastState = curState;
-                        }
-                    }
+                    sX = j;
+                    sY = i;
+                    dX = idx;
+                    dY = i;
+                    prevX = idx - 1;
+                    prevY = i;
                 }
 
                 if (x == 1) {
-                    int curState = state[i][3 - j];
-                    state[i][3 - j] = 0;    // reset
-                    if (curState != 0) {
-                        if (lastState == curState) {
-                            state[i][3 - (idx - 1)]++;
-                            moved = true;
-                        } else {
-                            if (idx != j) moved = true;
-                            state[i][3 - idx] = curState;
-                            idx++;
-                            lastState = curState;
-                        }
-                    }
+                    sX = 3 - j;
+                    sY = i;
+                    dX = 3 - idx;
+                    dY = i;
+                    prevX = 3 - (idx - 1);
+                    prevY = i;
                 }
 
-
                 if (y == -1) {
-                    int curState = state[j][i];
-                    state[j][i] = 0;    // reset
-                    if (curState != 0) {
-                        if (lastState == curState) {
-                            state[idx - 1][i]++;
-                            moved = true;
-                        } else {
-                            if (idx != j) moved = true;
-                            state[idx][i] = curState;
-                            idx++;
-                            lastState = curState;
-                        }
-                    }
+                    sX = i;
+                    sY = j;
+                    dX = i;
+                    dY = idx;
+                    prevX = i;
+                    prevY = idx - 1;
                 }
 
                 if (y == 1) {
-                    int curState = state[3 - j][i];
-                    state[3 - j][i] = 0;    // reset
-                    if (curState != 0) {
+                    sX = i;
+                    sY = 3 - j;
+                    dX = i;
+                    dY = 3 - idx;
+                    prevX = i;
+                    prevY = 3 - (idx - 1);
+                }
 
-                        if (lastState == curState) { // merge
-                            state[3 - (idx - 1)][i]++;
-                            moved = true;
-                        } else {
-                            state[3 - idx][i] = curState; // move
-                            if (idx != j) moved = true;
-                            idx++;
-                            lastState = curState;
-                        }
+                int curState = state[sY][sX];
+                state[sY][sX] = 0;    // reset
+                if (curState != 0) {
+                    if (lastState == curState) {    // merge two
+                        state[prevY][prevX]++;
+                        moved = true;
+                        lastState = 0; // merge only two
+                        mergeTile(sX, sY, prevX, prevY);
+                    } else {
+                        if (dX != sX || dY != sY) moved = true;
+                        state[dY][dX] = curState;
+                        moveTile(sX, sY, dX, dY);
+                        idx++;
+                        lastState = curState;
                     }
                 }
             }
@@ -231,6 +229,35 @@ Log.d("MOVE", scrollX +   " " + scrollY);
         }
     }
 
+    private void moveTile(int sX, int sY, int dX, int dY) {
+        for(Tile tile : tiles) {
+            if (tile.destX == sX && tile.destY == sY) {
+                tile.move(dX, dY);
+                return;
+            }
+        }
+        Log.e("could not find tile", "at " + sX + " " + sY);
+    }
+
+    private void mergeTile(int sX, int sY, int dX, int dY) {
+
+        Iterator<Tile> i = tiles.iterator();
+        while (i.hasNext()) {
+            Tile tile = i.next();
+
+            if (tile.destX == sX && tile.destY == sY) {
+                tile.move(dX, dY);
+                i.remove(); // remove the current tile
+
+            } else if (tile.destX == dX && tile.destY == dY) {
+                //tile.move(dX, dY);
+                tile.state++;
+
+            }
+        }
+        Log.e("could not find tile", "at " + sX + " " + sY);
+    }
+
     private void addNewTile() {
         nEmpty = 0;
         for (int i = 0; i < 16; i++) {
@@ -244,7 +271,12 @@ Log.d("MOVE", scrollX +   " " + scrollY);
         int position = (int) (Math.random() * nEmpty);
         int x = emptyList[position] % 4;
         int y = emptyList[position] / 4;
-        state[y][x] = Math.random() < .9 ? 2 : 4;
+        int newSpawn = Math.random() < .9 ? 1 : 2;
+
+        Tile tile = new Tile(renderer, width, height, offsetX, offsetY);
+        tile.spawn(newSpawn, x, y);
+        tiles.add(tile);
+        state[y][x] = newSpawn;
     }
 
 
@@ -276,6 +308,8 @@ Log.d("MOVE", scrollX +   " " + scrollY);
         drawText("score " + score, 0.1f, 0.1f, COLOR_WHITE, 50, false);
         float[] color = COLOR_RED;
         int scale = 30;
+
+
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
                 int curState = state[y][x];
@@ -283,7 +317,7 @@ Log.d("MOVE", scrollX +   " " + scrollY);
                 if (curState >= 1 && curState <= bgColor.length) {
                     color = bgColor[curState - 1];
                     scale = fontSizes[curState - 1];
-                    coverImage(SPR_SOLID_WHITE, 0.25f * x, 0.25f * y, 0.25f * (x + 1), 0.25f * (y + 1), 0.01f, 1, color);
+                    coverImage(SPR_SOLID_WHITE, 0.25f * x, 0.25f * y, 0.25f * (x + 0.5f), 0.25f * (y + 0.5f), 0.01f, 1, color);
                     drawText(  (int) Math.pow(2, curState) + "", 0.25f * (x + 0.5f), 0.25f * (y + 0.5f), COLOR_WHITE, scale, .5f, 0.5f);
 
                 }

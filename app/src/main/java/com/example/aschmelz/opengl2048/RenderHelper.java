@@ -7,8 +7,6 @@ package com.example.aschmelz.opengl2048;
 
 
 import static com.example.aschmelz.opengl2048.GLRenderer.tm;
-import static com.example.aschmelz.opengl2048.ImgConsts.dimensions;
-import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
 
 /**
