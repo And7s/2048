@@ -12,16 +12,26 @@ public class Tile extends RenderHelper {
     int destX, destY;
     float curX, curY, curScale, destScale,
     startX, startY, startScale;
+    public boolean isDead = false;
+
+    float animDuration = 1, animProgress = 0;
 
     public int state = 0;
+    private int curAnim = 0;
+    private static int ANIM_IN = 0, ANIM_MERGE = 1, ANIM_MOVE = 2;
 
     public Tile(GLRenderer renderer, float width, float height, float offsetX, float offsetY) {
         this.renderer = renderer;
         onSurfaceChanged(width, height, offsetX, offsetY);
     }
 
-    public void update(double dt) {
+    public boolean update(double dt) {
+        animProgress += dt;
+        if (isDead && animProgress > animDuration) {
+            return false;
+        }
         this.render(dt);
+        return true;     // still alive
     }
 
 
@@ -36,28 +46,65 @@ public class Tile extends RenderHelper {
     };
 
     private int[] fontSizes = {
-            60, // 2
-            60, // 4
-            60, // 8
-            50, // 16
-            50, // 32
-            50, // 64
-            40, // 128
-            40, // 256
+            120, // 2
+            120, // 4
+            120, // 8
+            100, // 16
+            100, // 32
+            100, // 64
+            90, // 128
+            90, // 256
     };
 
 
     private void render(double dt) {
+        // app crashes if this is removed
         drawText("hello world" + state, 0.1f, 0.1f, COLOR_RED, 30, false);
         int scale = 30;
         float[] color = COLOR_RED;
-        curX = destX;
-        curY = destY;
+        // animate
+
+        float progress = animProgress / animDuration;
+        if (progress > 1) progress = 1; // linear progress
+
+
+        float animProgress;
+        if (curAnim == ANIM_IN) {
+            // delay by 2/3
+            if (progress < .5) {
+                animProgress = 0;
+            } else {
+                progress = (progress - .5f) * 2;
+                animProgress = easeOutCubic(progress); // eased progress
+            }
+        } else if (curAnim == ANIM_MERGE) {
+            if (progress < 0.333) {
+                animProgress = 0;
+            } else {
+                progress = (progress - 0.333f) / 0.666f;
+                animProgress = easeOutBack(progress);
+            }
+
+        } else { // ANIM_MOVE
+            if (progress < 0.333) {
+                animProgress = easeInOutQuad(progress * 3); // eased progress
+            } else {
+                animProgress = 1;
+            }
+
+        }
+        curX = (1 - animProgress) * startX + animProgress * destX;
+        curY = (1 - animProgress) * startY + animProgress * destY;
+        curScale = (1 - animProgress) * startScale + animProgress * destScale;
+
         if (state >= 1 && state <= bgColor.length) {
             color = bgColor[state - 1];
             scale = fontSizes[state - 1];
-            coverImage(SPR_SOLID_WHITE, 0.25f * curX, 0.25f * curY, 0.25f * (curX + 1), 0.25f * (curY + 1), 0.01f, 1, color);
-            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), COLOR_WHITE, scale, .5f, 0.5f);
+            RenderConfig rc = new RenderConfig(0.25f * curX, 0.25f * curY, 0.25f * (curX + 1), 0.25f * (curY + 1));
+            rc.setScale(curScale * 0.95f);
+            rc.setColor(color);
+            coverImage(SPR_SOLID_WHITE, rc);
+            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), COLOR_WHITE, scale * curScale, .5f, 0.5f);
 
         }
     }
@@ -74,15 +121,69 @@ public class Tile extends RenderHelper {
         this.state = state;
         destX = x;
         destY = y;
-        curX = x;
-        curY = y;
+        startX = x;
+        startY = y;
+        startScale = 0;
+        destScale = 1;
+        animProgress = 0;
+        curAnim = ANIM_IN;
+    }
+
+    public void mergeSpawn(int state, int dX, int dY) {
+        this.state = state;
+        destX = dX;
+        destY = dY;
+        startX = dX;
+        startY = dY;
+        startScale = 0;
+        destScale = 1;
+        animProgress = 0;
+        curAnim = ANIM_MERGE;
+    }
+
+    public void die() {
+        startX = curX;
+        startY = curY;
+        startScale = curScale;  // so the animation wont run again
+        isDead = true;
+        animProgress = 0;
+        curAnim = ANIM_MOVE;
     }
 
     public void move(int x, int y) {
+        if (x == destX && y == destY) return;   // dont interrupt current running animation if destination is the same
+        startX = curX;
+        startY = curY;
+        startScale = curScale;
         destX = x;
         destY = y;
+        animProgress = 0;
+        curAnim = ANIM_MOVE;
+    }
+
+    // helper functions for timing
+    // t: current time, b: begInnIng value, c: change In value, d: duration
+    private float easeInCubic (float x) {
+        return x * x * x;
+    }
+
+    private float easeOutCubic (float x) {
+        x -= 1;
+        return x * x * x + 1;
     }
 
 
+    private float easeOutBack(float x) {
+        x -= 1;
+        float s = 1.7f;
+        return x * x * ((s + 1) * x + s) + 1;
+    }
+
+
+    private float easeInOutQuad(float x) {
+        x *= 2;
+        if (x < 1) return .5f * x * x;
+        return -.5f * ((--x)*(x-2) - 1);
+    };
 
 }

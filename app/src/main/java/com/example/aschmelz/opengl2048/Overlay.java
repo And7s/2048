@@ -24,7 +24,7 @@ import static com.example.aschmelz.opengl2048.TextManager.*;
 public class Overlay extends RenderHelper {
     private ClickRegion CR_amount_btn = new ClickRegion(0.7f, 0.15f, 0.9f, 0.5f, 0);
 
-
+    private static float[] COLOR_TILE_BG = {204 / 256f, 193 / 256f, 180 / 256f, 1};
 
     public Overlay(GLRenderer renderer) {
         this.renderer = renderer;
@@ -34,8 +34,13 @@ public class Overlay extends RenderHelper {
 
     public void update(double dt) {
         this.render(dt);
-        for(Tile tile : tiles) {
-            tile.update(dt);
+
+        Iterator<Tile> i = tiles.iterator();
+        while (i.hasNext()) {
+            Tile tile = i.next();
+            if (!tile.update(dt)) {
+                i.remove();
+            }
         }
     }
 
@@ -230,8 +235,9 @@ Log.d("MOVE", scrollX +   " " + scrollY);
     }
 
     private void moveTile(int sX, int sY, int dX, int dY) {
+
         for(Tile tile : tiles) {
-            if (tile.destX == sX && tile.destY == sY) {
+            if (!tile.isDead && tile.destX == sX && tile.destY == sY) {
                 tile.move(dX, dY);
                 return;
             }
@@ -242,20 +248,25 @@ Log.d("MOVE", scrollX +   " " + scrollY);
     private void mergeTile(int sX, int sY, int dX, int dY) {
 
         Iterator<Tile> i = tiles.iterator();
+        int state = 0;
+        Tile mergeTo = null;
         while (i.hasNext()) {
             Tile tile = i.next();
 
-            if (tile.destX == sX && tile.destY == sY) {
+            if (!tile.isDead && tile.destX == sX && tile.destY == sY) { // outer tile (merge from)
                 tile.move(dX, dY);
-                i.remove(); // remove the current tile
-
-            } else if (tile.destX == dX && tile.destY == dY) {
-                //tile.move(dX, dY);
-                tile.state++;
-
+                tile.die();
+            } else if (!tile.isDead && tile.destX == dX && tile.destY == dY) {  // inner tile (merge to)
+                state = tile.state;
+                mergeTo = tile;
+                tile.die();
             }
         }
-        Log.e("could not find tile", "at " + sX + " " + sY);
+
+        Tile newTile = new Tile(renderer, width, height, offsetX, offsetY);
+        newTile.mergeSpawn(state + 1, dX, dY);
+        tiles.add(newTile);
+
     }
 
     private void addNewTile() {
@@ -283,44 +294,29 @@ Log.d("MOVE", scrollX +   " " + scrollY);
     private void render(double dt) {
         coverImage(SPR_SOLID_WHITE, 0, 0.0f, 1, 1, COLOR_GREY_TRANSPARENT);
 
-
-        drawText("hello world", 0.5f, 0f, COLOR_WHITE, 60, 0.5f, 0f);
-
-
-        //coverImage(SPR_UNBOUGHT, 0.7f, 0.15f, 0.9f, 0.5f);
-
         renderGrid();
 
-        drawText("123123", 0.8f, 0.3f, COLOR_WHITE, 60, 0.5f, 0.5f, true);
-
-
-
+        /*
         drawText("right aligned", 1, 0, COLOR_RED, 30, 1, 0);
         drawText("left aligned", 0, 0, COLOR_RED, 30, 0, 0);
 
         drawText("right aligned", 1, 1, COLOR_RED, 30, 1, 1);
         drawText("left aligned", 0, 1, COLOR_RED, 30, 0, 1);
+        */
 
     }
 
 
     private void renderGrid() {
         drawText("score " + score, 0.1f, 0.1f, COLOR_WHITE, 50, false);
-        float[] color = COLOR_RED;
-        int scale = 30;
-
+        float[] color = COLOR_TILE_BG;
 
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
-                int curState = state[y][x];
-
-                if (curState >= 1 && curState <= bgColor.length) {
-                    color = bgColor[curState - 1];
-                    scale = fontSizes[curState - 1];
-                    coverImage(SPR_SOLID_WHITE, 0.25f * x, 0.25f * y, 0.25f * (x + 0.5f), 0.25f * (y + 0.5f), 0.01f, 1, color);
-                    drawText(  (int) Math.pow(2, curState) + "", 0.25f * (x + 0.5f), 0.25f * (y + 0.5f), COLOR_WHITE, scale, .5f, 0.5f);
-
-                }
+                RenderConfig rc = new RenderConfig(0.25f * x, 0.25f * y, 0.25f * (x + 1), 0.25f * (y + 1));
+                rc.setScale(0.95f);
+                rc.setColor(color);
+                coverImage(SPR_SOLID_WHITE, rc);
             }
         }
     }
