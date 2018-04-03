@@ -1,6 +1,6 @@
 package com.example.aschmelz.opengl2048;
 
-import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SOLID_WHITE;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
 
@@ -14,7 +14,7 @@ public class Tile extends RenderHelper {
     startX, startY, startScale;
     public boolean isDead = false;
 
-    float animDuration = 1, animProgress = 0;
+    float animDuration = .5f, animProgress = 0;
 
     public int state = 0;
     private int curAnim = 0;
@@ -58,10 +58,8 @@ public class Tile extends RenderHelper {
 
 
     private void render(double dt) {
-        // app crashes if this is removed
-        drawText("hello world" + state, 0.1f, 0.1f, COLOR_RED, 30, false);
         int scale = 30;
-        float[] color = COLOR_RED;
+        float[] color;
         // animate
 
         float progress = animProgress / animDuration;
@@ -101,10 +99,11 @@ public class Tile extends RenderHelper {
             color = bgColor[state - 1];
             scale = fontSizes[state - 1];
             RenderConfig rc = new RenderConfig(0.25f * curX, 0.25f * curY, 0.25f * (curX + 1), 0.25f * (curY + 1));
-            rc.setScale(curScale * 0.95f);
+            rc.setScale(curScale * 0.9f);
             rc.setColor(color);
-            coverImage(SPR_SOLID_WHITE, rc);
-            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), COLOR_WHITE, scale * curScale, .5f, 0.5f);
+            coverImage(SPR_SQUARE, rc);
+            float baseLine = 1.15f;
+            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), COLOR_WHITE, scale * curScale, .5f, 0.5f * baseLine);
 
         }
     }
@@ -172,18 +171,16 @@ public class Tile extends RenderHelper {
         return x * x * x + 1;
     }
 
-
     private float easeOutBack(float x) {
         x -= 1;
         float s = 1.7f;
         return x * x * ((s + 1) * x + s) + 1;
     }
 
-
     private float easeInOutQuad(float x) {
         x *= 2;
         if (x < 1) return .5f * x * x;
         return -.5f * ((--x)*(x-2) - 1);
-    };
+    }
 
 }

@@ -17,19 +17,16 @@ public class RenderHelper {
     protected GLRenderer renderer;
     protected float width = 1, height = 1, offsetX = 0, offsetY = 0;
 
+
     protected void drawText(String text, float left, float top, float[] color, float scale, float alignX, float alignY) {
-        drawText(text, left, top, color, scale, alignX, alignY, false);
-    }
-
-    protected void drawText(String text, float left, float top, float[] color, float scale, float alignX, float alignY, boolean special) {
         float txt_height = tm.getHeight(scale);
-        float txt_width = tm.getWidth(text, scale, special);
+        float txt_width = tm.getWidth(text, scale);
 
-        renderer.drawText(text, offsetX + left * width - txt_width * alignX, offsetY + top * height - txt_height * alignY, color, scale, special);
+        renderer.drawText(text, offsetX + left * width - txt_width * alignX, offsetY + top * height - txt_height * alignY, color, scale);
     }
 
-    protected void drawText(String text, float left, float top, float[] color, float scale, boolean special) {
-        renderer.drawText(text, offsetX + left * width, offsetY + top * height, COLOR_WHITE, scale, special);
+    protected void drawText(String text, float left, float top, float[] color, float scale) {
+        renderer.drawText(text, offsetX + left * width, offsetY + top * height, COLOR_WHITE, scale);
     }
     private void fitImageX(int idx, float left, float top, float right, float margin) {
         margin = margin * (right - left);

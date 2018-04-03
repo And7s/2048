@@ -42,32 +42,15 @@ public class Overlay extends RenderHelper {
                 i.remove();
             }
         }
+
+        drawText("score " + score, 0.1f, 0.1f, COLOR_WHITE, 50);
     }
 
     private List<Tile> tiles = new ArrayList<>();
 
     private int[][] state = new int[4][4];
 
-    private float[][] bgColor = {
-            {.929f, .890f, .852f, 1},   // 2
-            {.926f, .875f, .781f, 1},   // 4
-            {.945f, .691f, .473f, 1},   // 8
-            {.957f, .582f, .387f, 1},   // 16
-            {.861f, .484f, .371f, 1},   // 32
-            {.960f, .367f, .230f, 1},   // 64
-            {.926f, .809f, .445f, 1},   // 128
-    };
 
-    private int[] fontSizes = {
-            60, // 2
-            60, // 4
-            60, // 8
-            50, // 16
-            50, // 32
-            50, // 64
-            40, // 128
-            40, // 256
-    };
 
 
     public void onSurfaceChanged(float width, float height) {
@@ -153,6 +136,16 @@ Log.d("MOVE", scrollX +   " " + scrollY);
     private void move(int x, int y) {
         Log.d("move", "direction " + x + " " + y);
         boolean moved = false;
+
+        // new move => delete all dead tiles
+        Iterator<Tile> it = tiles.iterator();
+        while (it.hasNext()) {
+            Tile tile = it.next();
+            if (tile.isDead) {
+                it.remove();
+            }
+        }
+
 
         int sX = 0, sY = 0, dX = 0, dY = 0, prevX = 0, prevY = 0;
         // left
@@ -292,7 +285,7 @@ Log.d("MOVE", scrollX +   " " + scrollY);
 
 
     private void render(double dt) {
-        coverImage(SPR_SOLID_WHITE, 0, 0.0f, 1, 1, COLOR_GREY_TRANSPARENT);
+        coverImage(SPR_SQUARE, 0, 0.0f, 1, 1, COLOR_GREY_TRANSPARENT);
 
         renderGrid();
 
@@ -308,15 +301,15 @@ Log.d("MOVE", scrollX +   " " + scrollY);
 
 
     private void renderGrid() {
-        drawText("score " + score, 0.1f, 0.1f, COLOR_WHITE, 50, false);
+
         float[] color = COLOR_TILE_BG;
 
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
                 RenderConfig rc = new RenderConfig(0.25f * x, 0.25f * y, 0.25f * (x + 1), 0.25f * (y + 1));
-                rc.setScale(0.95f);
+                rc.setScale(0.9f);
                 rc.setColor(color);
-                coverImage(SPR_SOLID_WHITE, rc);
+                coverImage(SPR_SQUARE, rc);
             }
         }
     }

@@ -111,8 +111,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         frameTime = elapsed;
         longestFrame = Math.max(longestFrame, frameTime);
         try {
-            if (elapsed < 66)
-                Thread.sleep(66 - elapsed);
+            if (elapsed < 10)
+                Thread.sleep(10 - elapsed);
         } catch(InterruptedException e) {
 
         }
@@ -147,9 +147,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public void drawText(String text, float x, float y) {
         tm.addText(text, x, y, COLOR_WHITE, 30);
     }
-    public void drawText(String text, float x, float y, float[] color, float scale, boolean special) {
+    public void drawText(String text, float x, float y, float[] color, float scale) {
 
-        tm.addText(text, x, y, color, scale, special);
+        tm.addText(text, x, y, color, scale);
     }
 
     // fits width, scaleY proportional
@@ -199,7 +199,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         float scaleX = (right - left) / width,
                 scaleY = (bottom - top) / height;
         if (debugIdx != 0)
-            drawImage(idx, left, top, scaleX, scaleY, SPR_SOLID_WHITE, debugIdx);  // show the containing frame
+            drawImage(idx, left, top, scaleX, scaleY, SPR_SQUARE, debugIdx);  // show the containing frame
 
         if (scaleX > scaleY) {
             float offsetX =  (right - left - width * scaleY) / 2;    // center
@@ -289,10 +289,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         if (debugIdx != 0) {
             idx = debugIdx;
         }
-        float u1 = dimensions[idx][0] / 2048f,
-                v1 = dimensions[idx][1] / 2048f,
-                u2 = (dimensions[idx][0] + dimensions[idx][2] * progress) / 2048f,
-                v2 = (dimensions[idx][1] + dimensions[idx][3]) / 2048f;
+        float u1 = dimensions[idx][0] / 1024f,
+                v1 = dimensions[idx][1] / 1024f,
+                u2 = (dimensions[idx][0] + dimensions[idx][2] * progress) / 1024f,
+                v2 = (dimensions[idx][1] + dimensions[idx][3]) / 1024f;
 
 
 
@@ -344,7 +344,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private int mPositionHandle, mColorHandle, mTexCoordLoc, mtrxhandle, mSamplerLoc;
 
     public void renderTexture(float[] m) {
-
 
         GLES20.glUseProgram(riGraphicTools.sp_Image);
         // get handle to vertex shader's vPosition member
@@ -552,7 +551,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         // Orientation is assumed portrait
         ssx = swp / 320.0f;
+        ssy = shp / 320.0f;
+        /* alternatives if scaling should change on orientation
+        ssx = swp / 320.0f;
         ssy = shp / 480.0f;
+         */
 
         // Get our uniform scaler
         if(ssx > ssy)
@@ -578,7 +581,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         double dt = elapsed / 1000f;
 
         //draw the background
-        coverImage(BACKGROUND, 0, 0, mScreenWidth, mScreenHeight);
+        //coverImage(BACKGROUND, 0, 0, mScreenWidth, mScreenHeight);
 
 
         overlay.update(dt);
@@ -611,7 +614,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
             Log.d("realloc", "to size" + maxDrawCalls);
 
             vertices = resizeArray(vertices, maxDrawCalls * 12);
-            indices = resizeArray(indices, maxDrawCalls * 6);
+            indices = resizeArray(indices, maxDrawCalls * 16);   // was 8
             uvs = resizeArray(uvs, maxDrawCalls * 8);
             colors = resizeArray(colors, maxDrawCalls * 16);
 
@@ -639,5 +642,4 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         if (arr != null) System.arraycopy(arr, 0, newArr, 0, Math.min(size, arr.length));
         return newArr;
     }
-
 }
