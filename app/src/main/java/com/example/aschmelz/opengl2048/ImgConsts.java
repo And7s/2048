@@ -10,6 +10,10 @@ package com.example.aschmelz.opengl2048;
  */
 
 public class ImgConsts {
+    public static final float[]
+        COLOR_BACKGROUND = {250 / 256f, 248 / 256f, 239 / 256f , 1f},
+        COLOR_FIELD = {187 / 256f, 173 / 256f, 160 / 256f, 1f},
+        COLOR_TEXT_DARK = {119 / 256f, 110 / 256f, 101 / 256f, 1};
 
     public static final int
             SPR_SQUARE = 0,
@@ -106,7 +110,8 @@ public class ImgConsts {
             FONT_MARRYTODD_97 = 91,
             FONT_MARRYTODD_98 = 92,
             FONT_MARRYTODD_99 = 93,
-            FONT_MARRYTODD_53 = 94;
+            FONT_MARRYTODD_53 = 94,
+            SPR_SOLID_WHITE = 95;
 
     public static final int[][] dimensions = new int[][]
             {
@@ -205,6 +210,7 @@ public class ImgConsts {
                 { 287, 818, 62, 126},     // font_marrytodd_98
                 { 359, 818, 51, 126},     // font_marrytodd_99
                 { 420, 818, 57, 126},     // font_marrytodd_53
+                { 50, 50, 2, 2},        // solid white
             };
 }
 

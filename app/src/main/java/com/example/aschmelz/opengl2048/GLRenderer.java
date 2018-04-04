@@ -111,8 +111,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         frameTime = elapsed;
         longestFrame = Math.max(longestFrame, frameTime);
         try {
-            if (elapsed < 10)
-                Thread.sleep(10 - elapsed);
+            if (elapsed < 66)
+                Thread.sleep(66 - elapsed);
         } catch(InterruptedException e) {
 
         }
@@ -221,7 +221,67 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     }
 
 
+    // draws an image into the rect spanned of x1,y1, x2, y2 (=coverImage) all values in pixels
+    public void drawImagePx(int idx, float x1, float y1, float x2, float y2, float[] color) {
+        reallocBuffers(nDrawCalls + 1);
 
+        int i = nDrawCalls;
+
+        // Create the 2D parts of our 3D vertices, others are default 0.0f
+        vertices[(i*12) + 0] = x1;
+        vertices[(i*12) + 1] = y2;
+        vertices[(i*12) + 2] = zPos;
+        vertices[(i*12) + 3] = x1;
+        vertices[(i*12) + 4] = y1;
+        vertices[(i*12) + 5] = zPos;
+        vertices[(i*12) + 6] = x2;
+        vertices[(i*12) + 7] = y1;
+        vertices[(i*12) + 8] = zPos;
+        vertices[(i*12) + 9] = x2;
+        vertices[(i*12) + 10] = y2;
+        vertices[(i*12) + 11] = zPos;
+
+        zPos += 0.001;
+
+        int last = nDrawCalls * 4;
+        indices[(i*6) + 0] = (short) (last + 0);
+        indices[(i*6) + 1] = (short) (last + 1);
+        indices[(i*6) + 2] = (short) (last + 2);
+        indices[(i*6) + 3] = (short) (last + 0);
+        indices[(i*6) + 4] = (short) (last + 2);
+        indices[(i*6) + 5] = (short) (last + 3);
+
+        if (debugIdx != 0) {
+            idx = debugIdx;
+        }
+        float u1 = dimensions[idx][0] / 1024f,
+                v1 = dimensions[idx][1] / 1024f,
+                u2 = (dimensions[idx][0] + dimensions[idx][2]) / 1024f,
+                v2 = (dimensions[idx][1] + dimensions[idx][3]) / 1024f;
+
+        // Adding the UV's using the offsets
+        uvs[(i*8) + 0] = u1;
+        uvs[(i*8) + 1] = v2;
+        uvs[(i*8) + 2] = u1;
+        uvs[(i*8) + 3] = v1;
+        uvs[(i*8) + 4] = u2;
+        uvs[(i*8) + 5] = v1;
+        uvs[(i*8) + 6] = u2;
+        uvs[(i*8) + 7] = v2;
+
+        int cIdx = i * 16;
+        for (int j = 0; j < 4; j++) {
+            colors[cIdx++] = color[0];
+            colors[cIdx++] = color[1];
+            colors[cIdx++] = color[2];
+            colors[cIdx++] = color[3];
+
+        }
+
+        nDrawCalls++;
+    }
+
+    // draws an image with scaleX, scaleY diemensions starting from pixel coordinates scaleX, scaleY
     public void drawImage(int idx, float offset_x, float offset_y, float scaleX, float scaleY, int debugIdx, float progress, float[] color, float rotation) {
         reallocBuffers(nDrawCalls + 1);
 
@@ -581,7 +641,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         double dt = elapsed / 1000f;
 
         //draw the background
-        //coverImage(BACKGROUND, 0, 0, mScreenWidth, mScreenHeight);
+        coverImage(SPR_SOLID_WHITE, 0, 0, mScreenWidth, mScreenHeight, 1, COLOR_BACKGROUND);
 
 
         overlay.update(dt);

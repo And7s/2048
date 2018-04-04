@@ -25,7 +25,7 @@ public class Overlay extends RenderHelper {
     private ClickRegion CR_amount_btn = new ClickRegion(0.7f, 0.15f, 0.9f, 0.5f, 0);
 
     private static float[] COLOR_TILE_BG = {204 / 256f, 193 / 256f, 180 / 256f, 1};
-
+    float INNER_MARGIN = 0.97f;
     public Overlay(GLRenderer renderer) {
         this.renderer = renderer;
 
@@ -39,6 +39,7 @@ public class Overlay extends RenderHelper {
         while (i.hasNext()) {
             Tile tile = i.next();
             if (!tile.update(dt)) {
+                Log.d("iterator", "remove a tile");
                 i.remove();
             }
         }
@@ -54,21 +55,29 @@ public class Overlay extends RenderHelper {
 
 
     public void onSurfaceChanged(float width, float height) {
+        float factor = 0.9f;
         offsetX = 0;
         offsetY = 0;
 
         if (width > height) {   // landscape
-            this.width = height;
-            this.height = height;
-            offsetX = (width - this.width) / 2;
+            this.width = height * factor;
+            this.height = height * factor;
         } else {    // portrait
-            this.width = width;
-            this.height = width;
-            offsetY = (height - this.height) / 2;
+            this.width = width * factor;
+            this.height = width * factor;
         }
+        offsetX = (width - this.width) / 2;
+        offsetY = (height - this.height) / 2;
+
+        onSurfaceChangedUpdateTiles();
+
+    }
+
+    private void onSurfaceChangedUpdateTiles() {
 
         for (Tile tile : tiles) {
-            tile.onSurfaceChanged(this.width, this.height, offsetX, offsetY);
+            tile.onSurfaceChanged(this.width * INNER_MARGIN, this.height * INNER_MARGIN,
+                    offsetX + 0.5f * this.width * (1 - INNER_MARGIN), offsetY + 0.5f * this.height * (1 - INNER_MARGIN));
         }
     }
 
@@ -142,6 +151,7 @@ Log.d("MOVE", scrollX +   " " + scrollY);
         while (it.hasNext()) {
             Tile tile = it.next();
             if (tile.isDead) {
+                Log.d("remove", "tile in move");
                 it.remove();
             }
         }
@@ -256,9 +266,10 @@ Log.d("MOVE", scrollX +   " " + scrollY);
             }
         }
 
-        Tile newTile = new Tile(renderer, width, height, offsetX, offsetY);
+        Tile newTile = new Tile(renderer);
         newTile.mergeSpawn(state + 1, dX, dY);
         tiles.add(newTile);
+        onSurfaceChangedUpdateTiles();
 
     }
 
@@ -277,10 +288,11 @@ Log.d("MOVE", scrollX +   " " + scrollY);
         int y = emptyList[position] / 4;
         int newSpawn = Math.random() < .9 ? 1 : 2;
 
-        Tile tile = new Tile(renderer, width, height, offsetX, offsetY);
+        Tile tile = new Tile(renderer);
         tile.spawn(newSpawn, x, y);
         tiles.add(tile);
         state[y][x] = newSpawn;
+        onSurfaceChangedUpdateTiles();
     }
 
 
@@ -302,13 +314,15 @@ Log.d("MOVE", scrollX +   " " + scrollY);
 
     private void renderGrid() {
 
-        float[] color = COLOR_TILE_BG;
-
+        float offset = (1 - INNER_MARGIN) / 2;
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
-                RenderConfig rc = new RenderConfig(0.25f * x, 0.25f * y, 0.25f * (x + 1), 0.25f * (y + 1));
+                RenderConfig rc = new RenderConfig(
+                        0.25f * x * INNER_MARGIN + offset, 0.25f * y * INNER_MARGIN + offset,
+                        0.25f * (x + 1) * INNER_MARGIN + offset, 0.25f * (y + 1) * INNER_MARGIN + offset
+                );
                 rc.setScale(0.9f);
-                rc.setColor(color);
+                rc.setColor(COLOR_FIELD);
                 coverImage(SPR_SQUARE, rc);
             }
         }

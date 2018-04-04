@@ -21,7 +21,7 @@ public class TextManager extends RenderHelper {
     private static final float RI_TEXT_SPACESIZE = 40f;
 
     private float uniformscale;
-
+    private float uniformScaleX;
     public TextManager(GLRenderer renderer) {
         this.renderer = renderer;
     }
@@ -41,6 +41,7 @@ public class TextManager extends RenderHelper {
             COLOR_BROWN = {.230f, .211f, 0.188f, 1},
             COLOR_LIGHT_BROWN = {.543f, .504f, .465f, 1};
 
+    private static float REF_WIDTH = 1080;
     public float getHeight(float scale) {
         return 70f * scale * uniformscale;
     }
@@ -71,7 +72,7 @@ public class TextManager extends RenderHelper {
 
 
     public void addText(String text, float x, float y, float[] color, float scale) {
-        float dx = x / width + RI_TEXT_MARGIN * uniformscale / width * scale / 2, // start at half margin (perfect centered)
+        float dx = x / width + RI_TEXT_MARGIN * uniformscale / REF_WIDTH * scale / 2, // start at half margin (perfect centered)
                 dy = y / height,
                 fw,
                 fh = 0.05f * scale * uniformscale;
@@ -84,7 +85,7 @@ public class TextManager extends RenderHelper {
             c_val += offset;
             if(c == ' ') {
                 // space
-                fw = uniformscale * RI_TEXT_SPACESIZE / width * scale;
+                fw = uniformscale * RI_TEXT_SPACESIZE / REF_WIDTH * scale;
 
             } else if (c_val < 0 || c_val > FONT_CHAR.length - 1) {
                 Log.e("NO font", "error no img eith idx" + c_val + " text" + text);
@@ -94,9 +95,11 @@ public class TextManager extends RenderHelper {
                 fw = uniformscale * dimensions[img_idx][2] / width * scale;// TODO: use uniform scale
 
                 //coverImage(SPR_SQUARE, dx,dy,dx + fw, dy + fh, COLOR_RED);
+                coverImage(img_idx, dx,dy,dx + fw, dy + fh, COLOR_RED);
                 containImage(img_idx, dx,dy,dx + fw, dy + fh, color);
+renderer.drawImagePx(img_idx, 1f,2f,3f,4f, color);
             }
-            dx += (fw + RI_TEXT_MARGIN * uniformscale / width * scale);
+            dx += (fw + RI_TEXT_MARGIN * uniformscale / REF_WIDTH * scale);
         }
     }
 

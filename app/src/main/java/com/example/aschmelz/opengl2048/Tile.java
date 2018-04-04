@@ -1,5 +1,6 @@
 package com.example.aschmelz.opengl2048;
 
+import static com.example.aschmelz.opengl2048.ImgConsts.COLOR_TEXT_DARK;
 import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
@@ -20,9 +21,9 @@ public class Tile extends RenderHelper {
     private int curAnim = 0;
     private static int ANIM_IN = 0, ANIM_MERGE = 1, ANIM_MOVE = 2;
 
-    public Tile(GLRenderer renderer, float width, float height, float offsetX, float offsetY) {
+    public Tile(GLRenderer renderer) {
         this.renderer = renderer;
-        onSurfaceChanged(width, height, offsetX, offsetY);
+
     }
 
     public boolean update(double dt) {
@@ -56,10 +57,25 @@ public class Tile extends RenderHelper {
             90, // 256
     };
 
+    private float[][] textColors = {
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},    // 2
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},    // 4
+            {1, 1, 1, 1},    // 8
+            {1, 1, 1, 1},    // 16
+            {1, 1, 1, 1},    // 32
+            {1, 1, 1, 1},    // 64
+            {1, 1, 1, 1},    // 128
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},
+            {119 / 256f, 110 / 256f, 101 / 256f, 1},
+            {119 / 256f, 110 / 256f, 101 / 256f, 1}
+    };
 
     private void render(double dt) {
         int scale = 30;
         float[] color;
+        float[] textColor;
         // animate
 
         float progress = animProgress / animDuration;
@@ -98,12 +114,13 @@ public class Tile extends RenderHelper {
         if (state >= 1 && state <= bgColor.length) {
             color = bgColor[state - 1];
             scale = fontSizes[state - 1];
+            textColor = textColors[state - 1];
             RenderConfig rc = new RenderConfig(0.25f * curX, 0.25f * curY, 0.25f * (curX + 1), 0.25f * (curY + 1));
             rc.setScale(curScale * 0.9f);
             rc.setColor(color);
             coverImage(SPR_SQUARE, rc);
             float baseLine = 1.15f;
-            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), COLOR_WHITE, scale * curScale, .5f, 0.5f * baseLine);
+            drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), textColor, scale * curScale, .5f, 0.5f * baseLine);
 
         }
     }
