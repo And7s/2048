@@ -12,16 +12,10 @@ import static com.example.aschmelz.opengl2048.FontConstants.*;
 
 public class TextManager extends RenderHelper {
 
-
-
-
-
     private static final float
-            RI_TEXT_MARGIN = -24;
-    private static final float RI_TEXT_SPACESIZE = 40f;
+            RI_TEXT_MARGIN = -4f,
+            RI_TEXT_SPACESIZE = .3f;
 
-    private float uniformscale;
-    private float uniformScaleX;
     public TextManager(GLRenderer renderer) {
         this.renderer = renderer;
     }
@@ -43,7 +37,7 @@ public class TextManager extends RenderHelper {
 
     private static float REF_WIDTH = 1080;
     public float getHeight(float scale) {
-        return 70f * scale * uniformscale;
+        return scale;
     }
 
     public float getWidth(String text, float scale) {
@@ -53,9 +47,9 @@ public class TextManager extends RenderHelper {
             char c = text.charAt(j);
             int c_val = (int)c;
             c_val += offset;
-            if(c == ' ') {
+            if (c == ' ') {
                 // space
-                width +=  RI_TEXT_SPACESIZE;
+                width += RI_TEXT_SPACESIZE * scale + RI_TEXT_MARGIN;
 
             } else if (c_val < 0 || c_val > FONT_CHAR.length - 1) {
                 Log.e("NO font", "error no img eith idx" + c_val + " text" + text);
@@ -63,48 +57,40 @@ public class TextManager extends RenderHelper {
             } else {
                 int img_idx = FONT_CHAR[c_val];
 
-                float font_width = dimensions[img_idx][2];
+                float font_width = scale * dimensions[img_idx][2] / dimensions[img_idx][3];
                 width += font_width + RI_TEXT_MARGIN;// TODO: use uniform scale
             }
         }
-        return width * scale * uniformscale;
+        return width;
     }
 
 
     public void addText(String text, float x, float y, float[] color, float scale) {
-        float dx = x / width + RI_TEXT_MARGIN * uniformscale / REF_WIDTH * scale / 2, // start at half margin (perfect centered)
-                dy = y / height,
+        float dx = x + RI_TEXT_MARGIN / 2, // start at half margin (perfect centered)
+                dy = y,
                 fw,
-                fh = 0.05f * scale * uniformscale;
+                fh = scale;
         int offset = -33;
 
         // Create
-        for(int j = 0; j < text.length(); j++) {
+        for (int j = 0; j < text.length(); j++) {
             char c = text.charAt(j);
-            int c_val = (int)c;
+            int c_val = (int) c;
             c_val += offset;
-            if(c == ' ') {
+            if (c == ' ') {
                 // space
-                fw = uniformscale * RI_TEXT_SPACESIZE / REF_WIDTH * scale;
+                fw = RI_TEXT_SPACESIZE * scale;
 
             } else if (c_val < 0 || c_val > FONT_CHAR.length - 1) {
                 Log.e("NO font", "error no img eith idx" + c_val + " text" + text);
                 continue;
             } else {
                 int img_idx = FONT_CHAR[c_val];
-                fw = uniformscale * dimensions[img_idx][2] / width * scale;// TODO: use uniform scale
+                fw = scale * dimensions[img_idx][2] / dimensions[img_idx][3];   // keep aspect ration
 
-                //coverImage(SPR_SQUARE, dx,dy,dx + fw, dy + fh, COLOR_RED);
-                coverImage(img_idx, dx,dy,dx + fw, dy + fh, COLOR_RED);
-                containImage(img_idx, dx,dy,dx + fw, dy + fh, color);
-renderer.drawImagePx(img_idx, 1f,2f,3f,4f, color);
+                renderer.drawImagePx(img_idx, dx, dy, dx + fw, dy + fh, color);
             }
-            dx += (fw + RI_TEXT_MARGIN * uniformscale / REF_WIDTH * scale);
+            dx += fw + RI_TEXT_MARGIN;
         }
-    }
-
-    public void setUniformscale(float uniformscale) {
-
-        this.uniformscale = uniformscale / 200; // so 32/3.375 (1 scale = 1px height on the reference design
     }
 }

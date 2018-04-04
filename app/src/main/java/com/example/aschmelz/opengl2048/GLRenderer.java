@@ -71,7 +71,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     private Overlay overlay;
 
-    private static final float[] COLOR_WHITE = {1, 1, 1, 1};
+    private static final float[] COLOR_WHITE = {1, 1, 1, 1},
+        COLOR_BLACK = {0, 0, 0, 1};
 
     public GLRenderer(Context c)
     {
@@ -145,7 +146,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     }
 
     public void drawText(String text, float x, float y) {
-        tm.addText(text, x, y, COLOR_WHITE, 30);
+        tm.addText(text, x, y, COLOR_BLACK, 60);
     }
     public void drawText(String text, float x, float y, float[] color, float scale) {
 
@@ -596,9 +597,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         // Tell our text manager to use index 1 of textures loaded
 
-
-        // Pass the uniform scale
-        tm.setUniformscale(ssu);
 
     }
 

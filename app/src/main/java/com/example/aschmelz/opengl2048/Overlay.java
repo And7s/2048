@@ -301,13 +301,13 @@ Log.d("MOVE", scrollX +   " " + scrollY);
 
         renderGrid();
 
-        /*
+
         drawText("right aligned", 1, 0, COLOR_RED, 30, 1, 0);
         drawText("left aligned", 0, 0, COLOR_RED, 30, 0, 0);
 
         drawText("right aligned", 1, 1, COLOR_RED, 30, 1, 1);
         drawText("left aligned", 0, 1, COLOR_RED, 30, 0, 1);
-        */
+
 
     }
 

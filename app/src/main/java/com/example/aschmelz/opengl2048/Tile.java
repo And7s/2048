@@ -119,9 +119,8 @@ public class Tile extends RenderHelper {
             rc.setScale(curScale * 0.9f);
             rc.setColor(color);
             coverImage(SPR_SQUARE, rc);
-            float baseLine = 1.15f;
+            float baseLine = 0.9f;
             drawText(  (int) Math.pow(2, state) + "", 0.25f * (curX + 0.5f), 0.25f * (curY + 0.5f), textColor, scale * curScale, .5f, 0.5f * baseLine);
-
         }
     }
 
