@@ -2,7 +2,6 @@ package com.example.aschmelz.opengl2048;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -15,6 +14,7 @@ public class MainActivity extends Activity {
     // Our OpenGL Surfaceview
     private GLSurfaceView glSurfaceView;
 
+    public static DataStorage dataStorage;
 
 
     @Override
@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
         // Turn off the window's title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-
+        dataStorage = new DataStorage(this);
         // Super
         super.onCreate(savedInstanceState);
 
@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
         RelativeLayout.LayoutParams glParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         layout.addView(glSurfaceView, glParams);
         // after stores are initialized
+
 
     }
 

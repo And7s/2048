@@ -8,12 +8,6 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 
-/**
- * Created by aschmelz on 27/01/2018.
- */
-
-
-
 
 public class GLSurf extends GLSurfaceView {
 

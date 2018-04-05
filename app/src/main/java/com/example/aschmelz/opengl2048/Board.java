@@ -4,6 +4,7 @@ package com.example.aschmelz.opengl2048;
  * Created by aschmelz on 23/03/2018.
  */
 
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -15,6 +16,7 @@ import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static com.example.aschmelz.opengl2048.ImgConsts.*;
+import static com.example.aschmelz.opengl2048.MainActivity.dataStorage;
 import static com.example.aschmelz.opengl2048.TextManager.*;
 
 /**
@@ -31,8 +33,39 @@ public class Board extends RenderHelper {
 
     public Board(GLRenderer renderer) {
         this.renderer = renderer;
-        addNewTile();
+        load();
+        if (tiles.size() == 0) {
+            addNewTile();
+        }
     }
+
+    public void load() {
+        SharedPreferences sharedPref = dataStorage.getSharedPref();
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                state[y][x] = sharedPref.getInt(y + "-" + x, 0);
+                if (state[y][x] != 0) {
+
+                    Tile tile = new Tile(renderer);
+                    tile.spawn(state[y][x], x, y);
+                    tiles.add(tile);
+                }
+            }
+        }
+        onSurfaceChangedUpdateTiles();
+    }
+
+    public void save() {
+        SharedPreferences sharedPref = dataStorage.getSharedPref();
+        SharedPreferences.Editor editor = sharedPref.edit();
+        for (int y = 0; y < 4; y++) {
+            for (int x = 0; x < 4; x++) {
+                editor.putInt(y + "-" + x, state[y][x]);
+            }
+        }
+        editor.apply();
+    }
+
 
     public void update(double dt) {
         this.render(dt);
@@ -214,6 +247,7 @@ public class Board extends RenderHelper {
             addNewTile();
         }
         calculateScore();
+        save();
     }
 
     private int score = 0;

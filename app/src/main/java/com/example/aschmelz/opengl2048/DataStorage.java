@@ -41,6 +41,10 @@ public class DataStorage {
 
     }
 
+    public SharedPreferences getSharedPref() {
+        return sharedPref;
+    }
+
     public void read() {
         //double money = Double.longBitsToDouble(sharedPref.getLong("money", Double.doubleToLongBits(0)));
 

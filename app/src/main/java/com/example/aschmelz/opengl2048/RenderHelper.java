@@ -13,7 +13,7 @@ import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
  * Created by aschmelz on 15/02/2018.
  */
 
-public class RenderHelper {
+public abstract class RenderHelper {
     protected GLRenderer renderer;
     protected float width = 1, height = 1, offsetX = 0, offsetY = 0;
 
