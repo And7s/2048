@@ -23,11 +23,6 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static android.opengl.GLES20.GL_ONE_MINUS_SRC_ALPHA;
-import static android.view.MotionEvent.ACTION_DOWN;
-import static android.view.MotionEvent.ACTION_MOVE;
-import static android.view.MotionEvent.ACTION_UP;
-
-import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
 import static com.example.aschmelz.opengl2048.ImgConsts.*;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
@@ -65,7 +60,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     // Misc
     Context mContext;
     long mLastTime;
-    int mProgram;
 
     public static TextManager tm;
 
@@ -74,23 +68,19 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private static final float[] COLOR_WHITE = {1, 1, 1, 1},
         COLOR_BLACK = {0, 0, 0, 1};
 
-    public GLRenderer(Context c)
-    {
+    public GLRenderer(Context c) {
         mContext = c;
         mLastTime = System.currentTimeMillis() + 100;
-
 
         overlay = new Overlay(this);
         reallocBuffers(1);
     }
 
-    public void onPause()
-    {
+    public void onPause() {
         /* Do stuff to pause the renderer */
     }
 
-    public void onResume()
-    {
+    public void onResume() {
         /* Do stuff to resume the renderer */
         mLastTime = System.currentTimeMillis();
     }
@@ -122,9 +112,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         UpdateSprite(elapsed);
 
         drawText("elapsed " + elapsed + longestFrame, 10, 20);
-        drawText( "frame took: " + frameTime , 10, 50);
-        drawText("longestFrame: " + longestFrame, 10, 80);
-        drawText("FPS: " + FPS, 10, 110);
+        drawText( "frame took: " + frameTime , 10, 80);
+        drawText("longestFrame: " + longestFrame, 10, 140);
+        drawText("FPS: " + FPS, 10, 200);
 
         this.elapsed += elapsed;
         curFPS++;
@@ -489,6 +479,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // We need to know the current width and height.
         mScreenWidth = width;
         mScreenHeight = height;
+
         overlay.onSurfaceChanged(width, height);
         tm.onSurfaceChanged(width, height);
 
@@ -627,10 +618,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public void processTouchEvent(MotionEvent event) {
         // Get the half of screen value
 
-            overlay.processTouchEvent(event);
 
-
-
+        overlay.processTouchEvent(event);
     }
     public void UpdateSprite(long elapsed) {
 
@@ -640,7 +629,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         //draw the background
         coverImage(SPR_SOLID_WHITE, 0, 0, mScreenWidth, mScreenHeight, 1, COLOR_BACKGROUND);
-
 
         overlay.update(dt);
 
@@ -664,8 +652,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         colorBuffer = bbColors.asFloatBuffer();
         colorBuffer.put(colors);
         colorBuffer.position(0);
-
     }
+
     private void reallocBuffers(int size) {
         if (size > maxDrawCalls) {
             maxDrawCalls = Math.max(maxDrawCalls * 2, size);

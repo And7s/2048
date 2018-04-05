@@ -1,9 +1,6 @@
 package com.example.aschmelz.opengl2048;
 
-import static com.example.aschmelz.opengl2048.ImgConsts.COLOR_TEXT_DARK;
 import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE;
-import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
-import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
 
 /**
  * Created by aschmelz on 31/03/2018.
@@ -44,6 +41,11 @@ public class Tile extends RenderHelper {
             {.861f, .484f, .371f, 1},   // 32
             {.960f, .367f, .230f, 1},   // 64
             {.926f, .809f, .445f, 1},   // 128
+            {237 / 256f, 204 / 256f, 97 / 256f, 1}, // 256
+            {237 / 256f, 200 / 256f, 80 / 256f, 1}, // 512
+            {237 / 256f, 197 / 256f, 63 / 256f, 1}, // 1024
+            {237 / 256f, 194 / 256f, 46 / 256f, 1}, // 2048
+            {60 / 256f, 58 / 256f, 50 / 256f, 1}, // 4096 and up
     };
 
     private int[] fontSizes = {
@@ -60,16 +62,7 @@ public class Tile extends RenderHelper {
     private float[][] textColors = {
             {119 / 256f, 110 / 256f, 101 / 256f, 1},    // 2
             {119 / 256f, 110 / 256f, 101 / 256f, 1},    // 4
-            {1, 1, 1, 1},    // 8
-            {1, 1, 1, 1},    // 16
-            {1, 1, 1, 1},    // 32
-            {1, 1, 1, 1},    // 64
-            {1, 1, 1, 1},    // 128
-            {119 / 256f, 110 / 256f, 101 / 256f, 1},
-            {119 / 256f, 110 / 256f, 101 / 256f, 1},
-            {119 / 256f, 110 / 256f, 101 / 256f, 1},
-            {119 / 256f, 110 / 256f, 101 / 256f, 1},
-            {119 / 256f, 110 / 256f, 101 / 256f, 1}
+            {249 / 256f, 246 / 256f, 242 / 256f, 1}     // 8 and up
     };
 
     private void render(double dt) {
@@ -111,10 +104,10 @@ public class Tile extends RenderHelper {
         curY = (1 - animProgress) * startY + animProgress * destY;
         curScale = (1 - animProgress) * startScale + animProgress * destScale;
 
-        if (state >= 1 && state <= bgColor.length) {
-            color = bgColor[state - 1];
-            scale = fontSizes[state - 1];
-            textColor = textColors[state - 1];
+        if (state >= 1) {
+            color = bgColor[Math.min(state, bgColor.length) - 1];
+            scale = fontSizes[Math.min(fontSizes.length, state) - 1];
+            textColor = textColors[Math.min(textColors.length, state) - 1];
             RenderConfig rc = new RenderConfig(0.25f * curX, 0.25f * curY, 0.25f * (curX + 1), 0.25f * (curY + 1));
             rc.setScale(curScale * 0.9f);
             rc.setColor(color);
