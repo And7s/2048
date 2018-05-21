@@ -98,8 +98,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         frameTime = elapsed;
         longestFrame = Math.max(longestFrame, frameTime);
         try {
-            if (elapsed < 66)
-                Thread.sleep(66 - elapsed);
+            if (elapsed < 10)
+                Thread.sleep(10 - elapsed);
         } catch(InterruptedException e) {
 
         }

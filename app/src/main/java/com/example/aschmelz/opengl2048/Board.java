@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class Board extends RenderHelper {
 
 
     float INNER_MARGIN = 0.97f;
-    private List<Tile> tiles = new ArrayList<>();
+    private final List<Tile> tiles = Collections.synchronizedList(new ArrayList<Tile>());
     private int[][] state = new int[4][4];
     private int score = 0;
     private Overlay overlay;
@@ -89,7 +90,7 @@ public class Board extends RenderHelper {
     }
 
 
-    public synchronized void update(double dt) {
+    public void update(double dt) {
         this.render(dt);
         synchronized (tiles) {
             Iterator<Tile> i = tiles.iterator();
