@@ -13,7 +13,7 @@ import static com.example.aschmelz.opengl2048.FontConstants.*;
 public class TextManager extends RenderHelper {
 
     private static final float
-            RI_TEXT_MARGIN = -4f,
+            RI_TEXT_MARGIN = -0.12f,
             RI_TEXT_SPACESIZE = .3f;
 
     public TextManager(GLRenderer renderer) {
@@ -27,15 +27,9 @@ public class TextManager extends RenderHelper {
 
     public static final float[] COLOR_RED = {1f, 0, 0, 1f},
             COLOR_WHITE = {1,1,1,1},
-            COLOR_GREY = {.2f, .2f, .2f, 1},
-            COLOR_BLACK = {0, 0, 0, 1},
-            COLOR_GREY_TRANSPARENT = {.2f, .2f, .2f, .8f},
-            COLOR_ORANGE = {.875f, .531f, .285f, 1f},
-            COLOR_GREEN = {.508f, .684f , .273f, 1},
-            COLOR_BROWN = {.230f, .211f, 0.188f, 1},
-            COLOR_LIGHT_BROWN = {.543f, .504f, .465f, 1};
+            COLOR_BLACK = {0, 0, 0, 1};
 
-    private static float REF_WIDTH = 1080;
+
     public float getHeight(float scale) {
         return scale;
     }
@@ -49,7 +43,7 @@ public class TextManager extends RenderHelper {
             c_val += offset;
             if (c == ' ') {
                 // space
-                width += RI_TEXT_SPACESIZE * scale + RI_TEXT_MARGIN;
+                width += (RI_TEXT_SPACESIZE + RI_TEXT_MARGIN) * scale;
 
             } else if (c_val < 0 || c_val > FONT_CHAR.length - 1) {
                 Log.e("NO font", "error no img eith idx" + c_val + " text" + text);
@@ -58,7 +52,7 @@ public class TextManager extends RenderHelper {
                 int img_idx = FONT_CHAR[c_val];
 
                 float font_width = scale * dimensions[img_idx][2] / dimensions[img_idx][3];
-                width += font_width + RI_TEXT_MARGIN;// TODO: use uniform scale
+                width += font_width + RI_TEXT_MARGIN * scale;// TODO: use uniform scale
             }
         }
         return width;
@@ -66,7 +60,7 @@ public class TextManager extends RenderHelper {
 
 
     public void addText(String text, float x, float y, float[] color, float scale) {
-        float dx = x + RI_TEXT_MARGIN / 2, // start at half margin (perfect centered)
+        float dx = x + scale * RI_TEXT_MARGIN / 2, // start at half margin (perfect centered)
                 dy = y,
                 fw,
                 fh = scale;
@@ -90,7 +84,7 @@ public class TextManager extends RenderHelper {
 
                 renderer.drawImagePx(img_idx, dx, dy, dx + fw, dy + fh, color);
             }
-            dx += fw + RI_TEXT_MARGIN;
+            dx += fw + RI_TEXT_MARGIN * scale;
         }
     }
 }

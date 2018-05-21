@@ -7,6 +7,12 @@ package com.example.aschmelz.opengl2048;
 
 
 import static com.example.aschmelz.opengl2048.GLRenderer.tm;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_H;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_LB;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_LT;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_RB;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_RT;
+import static com.example.aschmelz.opengl2048.ImgConsts.SPR_SQUARE_V;
 import static com.example.aschmelz.opengl2048.TextManager.COLOR_WHITE;
 
 /**
@@ -26,7 +32,7 @@ public abstract class RenderHelper {
     }
 
     protected void drawText(String text, float left, float top, float[] color, float scale) {
-        renderer.drawText(text, offsetX + left * width, offsetY + top * height, COLOR_WHITE, scale);
+        renderer.drawText(text, offsetX + left * width, offsetY + top * height, color, scale);
     }
     private void fitImageX(int idx, float left, float top, float right, float margin) {
         margin = margin * (right - left);
@@ -79,6 +85,19 @@ public abstract class RenderHelper {
     public boolean contain(float x, float y, ClickRegion cr) {
         return (x > cr.left + cr.margin && x < cr.right - cr.margin &&
                 y > cr.top + cr.margin && y < cr.bottom - cr.margin);
+    }
+
+    protected void renderRoundCorner(float left, float top, float right, float bottom, float[] color, float radius) {
+        float radius_x = radius / width,
+                radius_y = radius / height;
+        coverImage(SPR_SQUARE_H, left + radius_x, top, right - radius_x, bottom, color);
+        coverImage(SPR_SQUARE_V, left, top + radius_y, right, bottom - radius_y, color);
+        radius_x *= 1.1; // to ensure overlap
+        radius_y *= 1.1;
+        coverImage(SPR_SQUARE_LT, left, top, left + radius_x, top + radius_y, color);
+        coverImage(SPR_SQUARE_LB, left, bottom - radius_y, left + radius_x, bottom, color);
+        coverImage(SPR_SQUARE_RT, right - radius_x, top, right, top + radius_y, color);
+        coverImage(SPR_SQUARE_RB, right - radius_x, bottom - radius_y, right, bottom, color);
     }
 
 }

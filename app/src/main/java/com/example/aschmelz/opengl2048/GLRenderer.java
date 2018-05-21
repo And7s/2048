@@ -33,12 +33,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private final float[] mtrxProjectionAndView = new float[16];
 
     // Geometric variables
-    public static float vertices[], colors[];
+    private static float vertices[], colors[], uvs[];
     public static short indices[];
-    public static float uvs[];
-    public FloatBuffer vertexBuffer;
+
+    public FloatBuffer vertexBuffer, uvBuffer, colorBuffer;
     public ShortBuffer drawListBuffer;
-    public FloatBuffer uvBuffer, colorBuffer;
     public static int debugIdx = 0;
 
     private ByteBuffer bbVertices, bbIndices, bbUvs, bbColors;
@@ -64,9 +63,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     public static TextManager tm;
 
     private Overlay overlay;
-
-    private static final float[] COLOR_WHITE = {1, 1, 1, 1},
-        COLOR_BLACK = {0, 0, 0, 1};
 
     public GLRenderer(Context c) {
         mContext = c;
@@ -110,12 +106,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         now = System.currentTimeMillis();
         elapsed = now - mLastTime;
         UpdateSprite(elapsed);
-
+/*
         drawText("elapsed " + elapsed + longestFrame, 10, 20);
         drawText( "frame took: " + frameTime , 10, 80);
         drawText("longestFrame: " + longestFrame, 10, 140);
         drawText("FPS: " + FPS, 10, 200);
-
+*/
         this.elapsed += elapsed;
         curFPS++;
         if (this.elapsed >= 1000) {
@@ -204,13 +200,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         drawImage(idx, offset_x, offset_y, scaleX, scaleY, debugIdx,1);
     }
 
-
     public void drawImage(int idx, float offset_x, float offset_y, float scaleX, float scaleY, int debugIdx, float progress) {
-        float color[] = {1, 1, 1, 1};
-
-        drawImage(idx, offset_x, offset_y, scaleX, scaleY, debugIdx, progress, color, 0);
+        drawImage(idx, offset_x, offset_y, scaleX, scaleY, debugIdx, progress, COLOR_WHITE, 0);
     }
-
 
     // draws an image into the rect spanned of x1,y1, x2, y2 (=coverImage) all values in pixels
     public void drawImagePx(int idx, float x1, float y1, float x2, float y2, float[] color) {

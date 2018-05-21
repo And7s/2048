@@ -17,7 +17,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
 import static com.example.aschmelz.opengl2048.ImgConsts.*;
 import static com.example.aschmelz.opengl2048.MainActivity.dataStorage;
-import static com.example.aschmelz.opengl2048.TextManager.*;
+import static com.example.aschmelz.opengl2048.TextManager.COLOR_RED;
 
 /**
  * Created by aschmelz on 15/02/2018.
@@ -26,17 +26,39 @@ import static com.example.aschmelz.opengl2048.TextManager.*;
 public class Board extends RenderHelper {
     private ClickRegion CR_amount_btn = new ClickRegion(0.7f, 0.15f, 0.9f, 0.5f, 0);
 
-    private static float[] COLOR_TILE_BG = {204 / 256f, 193 / 256f, 180 / 256f, 1};
+
     float INNER_MARGIN = 0.97f;
     private List<Tile> tiles = new ArrayList<>();
     private int[][] state = new int[4][4];
+    private int score = 0;
+    private Overlay overlay;
 
-    public Board(GLRenderer renderer) {
+    public Board(GLRenderer renderer, Overlay overlay) {
         this.renderer = renderer;
+        this.overlay = overlay;
         load();
         if (tiles.size() == 0) {
             addNewTile();
         }
+        calculateScore();
+
+        overlay.updateScore(0, score);
+    }
+
+    public void newGame() {
+        synchronized (tiles) {
+            tiles.clear();
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                state[i][j] = 0;
+            }
+        }
+        addNewTile();
+        calculateScore();
+
+        overlay.updateScore(0, score);
+
     }
 
     public void load() {
@@ -67,15 +89,16 @@ public class Board extends RenderHelper {
     }
 
 
-    public void update(double dt) {
+    public synchronized void update(double dt) {
         this.render(dt);
-
-        Iterator<Tile> i = tiles.iterator();
-        while (i.hasNext()) {
-            Tile tile = i.next();
-            if (!tile.update(dt)) {
-                Log.d("iterator", "remove a tile");
-                i.remove();
+        synchronized (tiles) {
+            Iterator<Tile> i = tiles.iterator();
+            while (i.hasNext()) {
+                Tile tile = i.next();
+                if (!tile.update(dt)) {
+                    Log.d("iterator", "remove a tile");
+                    i.remove();
+                }
             }
         }
     }
@@ -172,12 +195,14 @@ public class Board extends RenderHelper {
         boolean moved = false;
 
         // new move => delete all dead tiles
-        Iterator<Tile> it = tiles.iterator();
-        while (it.hasNext()) {
-            Tile tile = it.next();
-            if (tile.isDead) {
-                Log.d("remove", "tile in move");
-                it.remove();
+        synchronized (tiles) {
+            Iterator<Tile> it = tiles.iterator();
+            while (it.hasNext()) {
+                Tile tile = it.next();
+                if (tile.isDead) {
+                    Log.d("remove", "tile in move");
+                    it.remove();
+                }
             }
         }
 
@@ -246,11 +271,10 @@ public class Board extends RenderHelper {
         if (moved) {
             addNewTile();
         }
-        calculateScore();
         save();
     }
 
-    private int score = 0;
+
     private void calculateScore() {
         score = 0;
         for (int i = 0; i < 16; i++) {
@@ -275,12 +299,8 @@ public class Board extends RenderHelper {
     }
 
     private void mergeTile(int sX, int sY, int dX, int dY) {
-
-        Iterator<Tile> i = tiles.iterator();
         int state = 0;
-        while (i.hasNext()) {
-            Tile tile = i.next();
-
+        for (Tile tile: tiles) {
             if (!tile.isDead && tile.destX == sX && tile.destY == sY) { // outer tile (merge from)
                 tile.move(dX, dY);
                 tile.die();
@@ -313,14 +333,21 @@ public class Board extends RenderHelper {
 
         Tile tile = new Tile(renderer);
         tile.spawn(newSpawn, x, y);
-        tiles.add(tile);
+        synchronized (tiles) {
+            tiles.add(tile);
+        }
         state[y][x] = newSpawn;
         onSurfaceChangedUpdateTiles();
+
+        calculateScore();
+        overlay.updateScore(newSpawn, score);
     }
 
 
+
     private void render(double dt) {
-        coverImage(SPR_SQUARE, 0, 0.0f, 1, 1, COLOR_GREY_TRANSPARENT);
+
+        renderRoundCorner(0,0,1,1, COLOR_BOARD, 50f);
 
         renderGrid();
 
@@ -345,7 +372,7 @@ public class Board extends RenderHelper {
                         0.25f * (x + 1) * INNER_MARGIN + offset, 0.25f * (y + 1) * INNER_MARGIN + offset
                 );
                 rc.setScale(0.9f);
-                rc.setColor(COLOR_FIELD);
+                rc.setColor(COLOR_TILE_BG);
                 coverImage(SPR_SQUARE, rc);
             }
         }
